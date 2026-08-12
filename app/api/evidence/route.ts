@@ -1,3 +1,5 @@
+// External scientific APIs are narrowed field-by-field after retrieval.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type UnknownRecord = Record<string, any>;
 
 const asArray = <T,>(value: T[] | undefined): T[] => Array.isArray(value) ? value : [];
@@ -12,6 +14,42 @@ async function fetchJson(url: string, label: string) {
   });
   if (!response.ok) throw new Error(`${label} returned ${response.status}`);
   return response.json() as Promise<UnknownRecord>;
+}
+
+async function fetchText(url: string, label: string) {
+  const response = await fetch(url, {
+    headers: { "User-Agent": "TrialLens/1.0 (evidence-research-workspace)" },
+  });
+  if (!response.ok) throw new Error(`${label} returned ${response.status}`);
+  return response.text();
+}
+
+function decodeXml(value: string) {
+  return value
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"').replace(/&apos;|&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/\s+/g, " ").trim();
+}
+
+function parsePubMedDetails(xml: string) {
+  const details = new Map<string, { abstract: string; publicationTypes: string[] }>();
+  const articles = xml.match(/<PubmedArticle\b[\s\S]*?<\/PubmedArticle>/g) ?? [];
+  for (const article of articles) {
+    const pmid = article.match(/<PMID\b[^>]*>(\d+)<\/PMID>/)?.[1];
+    if (!pmid) continue;
+    const abstract = [...article.matchAll(/<AbstractText\b([^>]*)>([\s\S]*?)<\/AbstractText>/g)]
+      .map((match) => {
+        const label = match[1].match(/Label="([^"]+)"/)?.[1];
+        const text = decodeXml(match[2]);
+        return label && text ? `${decodeXml(label)}: ${text}` : text;
+      }).filter(Boolean).join("\n");
+    const publicationTypes = [...article.matchAll(/<PublicationType\b[^>]*>([\s\S]*?)<\/PublicationType>/g)]
+      .map((match) => decodeXml(match[1])).filter(Boolean);
+    details.set(pmid, { abstract, publicationTypes });
+  }
+  return details;
 }
 
 function normaliseTrial(study: UnknownRecord) {
@@ -40,7 +78,7 @@ function normaliseTrial(study: UnknownRecord) {
   };
 }
 
-function normalisePublication(record: UnknownRecord, uid: string) {
+function normalisePublication(record: UnknownRecord, uid: string, details?: { abstract: string; publicationTypes: string[] }) {
   const authors = asArray<UnknownRecord>(record.authors).slice(0, 3).map((author) => clean(author.name, "")).filter(Boolean);
   return {
     pmid: uid,
@@ -48,6 +86,8 @@ function normalisePublication(record: UnknownRecord, uid: string) {
     journal: clean(record.fulljournalname || record.source),
     date: clean(record.pubdate, "Date unavailable"),
     authors,
+    abstract: details?.abstract ?? "",
+    publicationTypes: details?.publicationTypes ?? [],
     url: `https://pubmed.ncbi.nlm.nih.gov/${uid}/`,
   };
 }
@@ -91,8 +131,17 @@ export async function GET(request: Request) {
       summaryUrl.searchParams.set("id", ids.join(","));
       summaryUrl.searchParams.set("retmode", "json");
       summaryUrl.searchParams.set("tool", "triallens");
-      const summaryData = await fetchJson(summaryUrl.toString(), "PubMed summaries");
-      publications = ids.map((uid) => normalisePublication(summaryData.result?.[uid] ?? {}, uid));
+      const detailsUrl = new URL("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi");
+      detailsUrl.searchParams.set("db", "pubmed");
+      detailsUrl.searchParams.set("id", ids.join(","));
+      detailsUrl.searchParams.set("retmode", "xml");
+      detailsUrl.searchParams.set("tool", "triallens");
+      const [summaryData, detailsXml] = await Promise.all([
+        fetchJson(summaryUrl.toString(), "PubMed summaries"),
+        fetchText(detailsUrl.toString(), "PubMed abstracts"),
+      ]);
+      const details = parsePubMedDetails(detailsXml);
+      publications = ids.map((uid) => normalisePublication(summaryData.result?.[uid] ?? {}, uid, details.get(uid)));
     }
 
     const trials = asArray<UnknownRecord>(trialData.studies).map(normaliseTrial);
