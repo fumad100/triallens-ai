@@ -49,21 +49,12 @@ export default function Home() {
 
   function useExample(example:typeof examples[number]) { setDrug(example.drug); setCondition(example.condition); setError(""); }
 
-  function scrollToSection(id:string) {
-    document.getElementById(id)?.scrollIntoView({ behavior:"smooth", block:"start" });
-  }
-
-  function startNewReview() {
-    setDrug(""); setCondition(""); setEvidence(null); setLoading(false); setError(""); setTab("overview"); setReview("pending");
-    window.setTimeout(() => { scrollToSection("top"); document.getElementById("question")?.focus(); }, 20);
-  }
-
   return <main>
     <div className="notice">Live evidence from official sources · Updated on every search</div>
     <header className="site-header">
-      <button className="logo" type="button" onClick={startNewReview} aria-label="TrialLens AI — start a new evidence search"><Mark/><span>TrialLens</span><sup>AI</sup></button>
-      <nav><button type="button" onClick={()=>scrollToSection("how")}>How it works</button><button type="button" onClick={()=>scrollToSection("sources")}>Sources</button><button type="button" onClick={()=>scrollToSection("responsible")}>Responsible AI</button></nav>
-      <button className="header-action" onClick={startNewReview}>New review <Arrow/></button>
+      <a className="logo" href="/" aria-label="TrialLens AI home"><Mark/><span>TrialLens</span><sup>AI</sup></a>
+      <nav><a href="/how-it-works">How it works</a><a href="/#sources">Sources</a><a href="/responsible-ai">Responsible AI</a></nav>
+      <a className="header-action" href="/new-review">New review <Arrow/></a>
     </header>
 
     <section className="hero" id="top">
@@ -118,10 +109,6 @@ export default function Home() {
 
       {tab==="brief"&&<div className="brief-layout"><article className="panel brief-card"><span className="mini-label">EXPORTABLE REVIEW</span><h2>Evidence landscape brief</h2><div className="brief-meta"><div><span>Asset</span><b>{evidence.query.drug}</b></div><div><span>Indication</span><b>{evidence.query.condition}</b></div><div><span>Readiness</span><b>{evidence.readiness.level}</b></div><div><span>Review status</span><b>{review==="accepted"?"Accepted by reviewer":"Pending"}</b></div></div><h3>Automated rationale</h3><p>{evidence.readiness.rationale}</p><h3>Evidence snapshot</h3><p>{evidence.counts.totalTrials.toLocaleString()} registered trials and {evidence.counts.totalPublications.toLocaleString()} PubMed publications matched this asset–indication pair. The retrieved trial set contains {evidence.counts.lateStage} late-stage record(s) and {evidence.counts.withResults} record(s) with posted results.</p><div className="brief-warning"><b>Interpretation required</b>Review individual endpoints, outcome data, safety results, population relevance and study quality before reaching a progression conclusion.</div></article><aside><a className="download" href={`/api/brief?drug=${encodeURIComponent(evidence.query.drug)}&condition=${encodeURIComponent(evidence.query.condition)}&readiness=${encodeURIComponent(evidence.readiness.level)}&trials=${evidence.counts.totalTrials}&publications=${evidence.counts.totalPublications}&lateStage=${evidence.counts.lateStage}&results=${evidence.counts.withResults}&reviewed=${review==="accepted"}`} download>↓ Download brief <Arrow/></a><p>Exports the live source counts and review status as a text brief.</p></aside></div>}
     </section>}
-    <section className="responsible-section" id="responsible">
-      <div><span className="mini-label">RESPONSIBLE AI</span><h2>Evidence support with clear boundaries</h2><p>TrialLens retrieves and structures source records so experts can review the evidence trail. It does not replace scientific, medical, regulatory or governance judgement.</p></div>
-      <div className="responsible-principles"><article><b>01</b><h3>Source-grounded</h3><p>Counts and records link back to ClinicalTrials.gov and PubMed.</p></article><article><b>02</b><h3>No invented outcomes</h3><p>The workspace does not infer efficacy or safety from registry metadata alone.</p></article><article><b>03</b><h3>Human accountable</h3><p>A qualified reviewer remains responsible for interpretation and decisions.</p></article></div>
-    </section>
-    <footer><button className="logo" type="button" onClick={startNewReview}><Mark/><span>TrialLens</span><sup>AI</sup></button><p>Evidence → context → human decision</p><span>Official source data remains subject to its source record.</span></footer>
+    <footer><a className="logo" href="/"><Mark/><span>TrialLens</span><sup>AI</sup></a><p>Evidence → context → human decision</p><span>Official source data remains subject to its source record.</span></footer>
   </main>;
 }
