@@ -57,20 +57,20 @@ export async function GET(request: Request) {
   const drug = url.searchParams.get("drug")?.trim() ?? "";
   const condition = url.searchParams.get("condition")?.trim() ?? "";
 
-  if (drug.length < 2 || condition.length < 2) {
-    return Response.json({ error: "Enter both a drug or asset and an indication." }, { status: 400 });
+  if (drug.length < 2) {
+    return Response.json({ error: "Enter a drug or asset to search." }, { status: 400 });
   }
 
   const trialsUrl = new URL("https://clinicaltrials.gov/api/v2/studies");
   trialsUrl.searchParams.set("query.intr", drug);
-  trialsUrl.searchParams.set("query.cond", condition);
+  if (condition) trialsUrl.searchParams.set("query.cond", condition);
   trialsUrl.searchParams.set("pageSize", "12");
   trialsUrl.searchParams.set("countTotal", "true");
   trialsUrl.searchParams.set("format", "json");
 
   const pubmedSearchUrl = new URL("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi");
   pubmedSearchUrl.searchParams.set("db", "pubmed");
-  pubmedSearchUrl.searchParams.set("term", `${drug} AND ${condition}`);
+  pubmedSearchUrl.searchParams.set("term", condition ? `${drug} AND ${condition}` : drug);
   pubmedSearchUrl.searchParams.set("retmode", "json");
   pubmedSearchUrl.searchParams.set("retmax", "8");
   pubmedSearchUrl.searchParams.set("sort", "relevance");
@@ -112,7 +112,7 @@ export async function GET(request: Request) {
           : { level: "Early evidence", tone: "low", rationale: "The retrieved evidence base is small or early-stage; progression conclusions would be premature." };
 
     return Response.json({
-      query: { drug, condition },
+      query: { drug, condition: condition || "All indications" },
       retrievedAt: new Date().toISOString(),
       counts: { totalTrials, totalPublications, completed, ongoing, lateStage, withResults },
       readiness,
@@ -120,7 +120,7 @@ export async function GET(request: Request) {
       publications,
       sources: [
         { name: "ClinicalTrials.gov", url: trialsUrl.toString() },
-        { name: "PubMed", url: `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(`${drug} ${condition}`)}` },
+        { name: "PubMed", url: `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(condition ? `${drug} ${condition}` : drug)}` },
       ],
     }, { headers: { "Cache-Control": "public, max-age=300" } });
   } catch (error) {

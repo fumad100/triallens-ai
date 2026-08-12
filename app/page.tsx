@@ -35,7 +35,7 @@ export default function Home() {
   async function analyse(event?:React.FormEvent) {
     event?.preventDefault();
     setError("");
-    if (!drug.trim() || !condition.trim()) { setError("Enter both a drug or asset and an indication."); return; }
+    if (!drug.trim()) { setError("Enter a drug or asset to search."); return; }
     setLoading(true); setEvidence(null); setTab("overview"); setReview("pending");
     try {
       const response = await fetch(`/api/evidence?drug=${encodeURIComponent(drug)}&condition=${encodeURIComponent(condition)}`);
@@ -65,7 +65,7 @@ export default function Home() {
         <div className="question-label"><span className="question-orbit"></span>Should this asset progress to the next development stage?</div>
         <div className="field-grid">
           <label><span>Drug or asset</span><input id="question" value={drug} onChange={e=>setDrug(e.target.value)} placeholder="e.g. Omecamtiv mecarbil" autoComplete="off"/></label>
-          <label><span>Indication</span><input value={condition} onChange={e=>setCondition(e.target.value)} placeholder="e.g. Heart failure" autoComplete="off"/></label>
+          <label><span>Indication <em>optional</em></span><input value={condition} onChange={e=>setCondition(e.target.value)} placeholder="All indications" autoComplete="off"/></label>
           <button type="submit" disabled={loading}>{loading?<><i className="spinner"></i>Retrieving evidence</>:<>Analyse evidence <Arrow/></>}</button>
         </div>
         {error&&<div className="form-error" role="alert"><b>!</b>{error}</div>}
@@ -77,7 +77,7 @@ export default function Home() {
 
     {!evidence&&!loading&&<section className="how" id="how">
       <div className="section-intro"><span>THE WORKFLOW</span><h2>From question to a reviewable evidence landscape</h2><p>Designed for clinical-development teams who need the source trail, not just an answer.</p></div>
-      <div className="steps"><article><b>01</b><i>⌕</i><h3>Frame the question</h3><p>Define the asset and indication. TrialLens translates the pair into source-specific searches.</p></article><article><b>02</b><i>◎</i><h3>Retrieve live evidence</h3><p>Clinical trial records and PubMed publications are retrieved directly from official APIs.</p></article><article><b>03</b><i>≋</i><h3>Review maturity</h3><p>Inspect phases, statuses, posted results, endpoints, sponsors and linked literature.</p></article><article><b>04</b><i>✓</i><h3>Apply expert judgement</h3><p>Accept the evidence landscape, document gaps and export a traceable review brief.</p></article></div>
+      <div className="steps"><article><b>01</b><i>⌕</i><h3>Frame the question</h3><p>Enter an asset and optionally narrow the search to a specific indication.</p></article><article><b>02</b><i>◎</i><h3>Retrieve live evidence</h3><p>Clinical trial records and PubMed publications are retrieved directly from official APIs.</p></article><article><b>03</b><i>≋</i><h3>Review maturity</h3><p>Inspect phases, statuses, posted results, endpoints, sponsors and linked literature.</p></article><article><b>04</b><i>✓</i><h3>Apply expert judgement</h3><p>Accept the evidence landscape, document gaps and export a traceable review brief.</p></article></div>
     </section>}
 
     {loading&&<section className="loading-state" aria-live="polite"><div className="scan-ring"><Mark/></div><span>Retrieving live evidence</span><h2>Building the evidence landscape</h2><div className="loading-sources"><b>ClinicalTrials.gov</b><i></i><b>PubMed</b></div><p>This usually takes a few seconds.</p></section>}
