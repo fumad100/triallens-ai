@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Search clinical trials and PubMed literature in an evidence-grounded drug-development workspace.">
+  <title>TrialLens AI — Evidence-grounded development decisions</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="notice">Live evidence from official sources · Updated on every search</div>
+  <header class="site-header">
+    <a class="logo" href="./" aria-label="TrialLens AI home"><span class="mark">✦</span><strong>TrialLens</strong><sup>AI</sup></a>
+    <nav><a href="./how-it-works/">How it works</a><a href="#sources">Sources</a><a href="./responsible-ai/">Responsible AI</a></nav>
+    <a class="outline-button" href="./new-review/">New review →</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">EVIDENCE-GROUNDED DEVELOPMENT DECISIONS</p>
+      <h1>Ask a hard development question.<br><em>Start with the evidence.</em></h1>
+      <p class="lede">Search authoritative clinical records and scientific literature in one traceable workspace—before forming a progression view.</p>
+
+      <form id="search-form" class="search-card">
+        <h2>Should this asset progress to the next development stage?</h2>
+        <div class="form-grid">
+          <label>Drug or asset<input id="drug" placeholder="e.g. amlodipine" autocomplete="off" required></label>
+          <label>Indication <small>optional</small><input id="condition" placeholder="All indications" autocomplete="off"></label>
+          <button id="search-button" type="submit">Analyse evidence →</button>
+        </div>
+        <p id="error" class="error" role="alert" hidden></p>
+        <div id="sources" class="source-row"><span>Searching</span><b>ClinicalTrials.gov</b><b>PubMed</b><small>No account or API key required</small></div>
+      </form>
+
+      <div class="examples"><span>Try an example</span><button data-drug="Amlodipine">Amlodipine</button><button data-drug="Donanemab" data-condition="Alzheimer disease">Donanemab</button><button data-drug="Osimertinib" data-condition="non-small cell lung cancer">Osimertinib</button></div>
+      <div class="trust"><span>✓ Traceable records</span><span>✓ Live source retrieval</span><span>✓ Human review required</span></div>
+    </section>
+
+    <section class="workflow">
+      <div class="section-heading"><p class="eyebrow">THE WORKFLOW</p><h2>From question to a reviewable evidence landscape</h2><p>Designed for development teams who need the source trail, not just an answer.</p></div>
+      <div class="steps">
+        <article><b>01</b><h3>Frame the question</h3><p>Enter an asset and optionally narrow the search to an indication.</p></article>
+        <article><b>02</b><h3>Retrieve live evidence</h3><p>Query ClinicalTrials.gov and PubMed directly from your browser.</p></article>
+        <article><b>03</b><h3>Review maturity</h3><p>Inspect phases, statuses, results, sponsors and literature.</p></article>
+        <article><b>04</b><h3>Apply expert judgement</h3><p>Review the evidence and export a traceable brief.</p></article>
+      </div>
+    </section>
+
+    <section id="loading" class="loading" hidden><div class="loader"></div><p class="eyebrow">RETRIEVING LIVE EVIDENCE</p><h2>Building the evidence landscape</h2><p>ClinicalTrials.gov · PubMed</p></section>
+    <section id="results" class="results" hidden aria-live="polite"></section>
+  </main>
+
+  <footer><a class="logo" href="./"><span class="mark">✦</span><strong>TrialLens</strong><sup>AI</sup></a><p>Evidence → context → human decision</p><span>Official source data remains subject to its source record.</span></footer>
+</body>
+</html>

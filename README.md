@@ -7,10 +7,7 @@ review.
 
 ## Live application
 
-[Open TrialLens AI](https://triallens-ai-evidence.fmahamud16.chatgpt.site)
-
-The hosted application may require sign-in. This repository is public, but the
-application's hosting access policy is managed separately.
+[Open TrialLens AI on GitHub Pages](https://fumad100.github.io/triallens-ai/)
 
 ## Features
 
@@ -39,12 +36,11 @@ npm test
 npm run lint
 ```
 
-## Deployment note
+## GitHub Pages deployment
 
-TrialLens AI contains server-side API routes under `app/api/`. GitHub Pages is
-static hosting and cannot run those routes directly. The source code is hosted
-on GitHub, while the functional application is deployed on a compatible
-server-side runtime.
+The independent static deployment is in `docs/`. It queries the public
+ClinicalTrials.gov and PubMed APIs directly from the visitor's browser, so it
+does not require a ChatGPT-hosted runtime or application server.
 
 ## Responsible use
 
