@@ -49,12 +49,21 @@ export default function Home() {
 
   function useExample(example:typeof examples[number]) { setDrug(example.drug); setCondition(example.condition); setError(""); }
 
+  function scrollToSection(id:string) {
+    document.getElementById(id)?.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  function startNewReview() {
+    setDrug(""); setCondition(""); setEvidence(null); setLoading(false); setError(""); setTab("overview"); setReview("pending");
+    window.setTimeout(() => { scrollToSection("top"); document.getElementById("question")?.focus(); }, 20);
+  }
+
   return <main>
     <div className="notice">Live evidence from official sources · Updated on every search</div>
     <header className="site-header">
-      <a className="logo" href="#top" aria-label="TrialLens home"><Mark/><span>TrialLens</span><sup>AI</sup></a>
-      <nav><a href="#how">How it works</a><a href="#sources">Sources</a><a href="#responsible">Responsible AI</a></nav>
-      <button className="header-action" onClick={()=>document.getElementById("question")?.focus()}>New review <Arrow/></button>
+      <button className="logo" type="button" onClick={startNewReview} aria-label="TrialLens AI — start a new evidence search"><Mark/><span>TrialLens</span><sup>AI</sup></button>
+      <nav><button type="button" onClick={()=>scrollToSection("how")}>How it works</button><button type="button" onClick={()=>scrollToSection("sources")}>Sources</button><button type="button" onClick={()=>scrollToSection("responsible")}>Responsible AI</button></nav>
+      <button className="header-action" onClick={startNewReview}>New review <Arrow/></button>
     </header>
 
     <section className="hero" id="top">
@@ -75,10 +84,10 @@ export default function Home() {
       <div className="trust-row"><span>✓ Traceable records</span><span>✓ Live source retrieval</span><span>✓ Human review required</span></div>
     </section>
 
-    {!evidence&&!loading&&<section className="how" id="how">
+    <section className="how" id="how">
       <div className="section-intro"><span>THE WORKFLOW</span><h2>From question to a reviewable evidence landscape</h2><p>Designed for clinical-development teams who need the source trail, not just an answer.</p></div>
       <div className="steps"><article><b>01</b><i>⌕</i><h3>Frame the question</h3><p>Enter an asset and optionally narrow the search to a specific indication.</p></article><article><b>02</b><i>◎</i><h3>Retrieve live evidence</h3><p>Clinical trial records and PubMed publications are retrieved directly from official APIs.</p></article><article><b>03</b><i>≋</i><h3>Review maturity</h3><p>Inspect phases, statuses, posted results, endpoints, sponsors and linked literature.</p></article><article><b>04</b><i>✓</i><h3>Apply expert judgement</h3><p>Accept the evidence landscape, document gaps and export a traceable review brief.</p></article></div>
-    </section>}
+    </section>
 
     {loading&&<section className="loading-state" aria-live="polite"><div className="scan-ring"><Mark/></div><span>Retrieving live evidence</span><h2>Building the evidence landscape</h2><div className="loading-sources"><b>ClinicalTrials.gov</b><i></i><b>PubMed</b></div><p>This usually takes a few seconds.</p></section>}
 
@@ -99,7 +108,7 @@ export default function Home() {
           <span className="mini-label">DECISION READINESS</span><div className={`readiness-icon ${evidence.readiness.tone}`}>{evidence.readiness.tone==="high"?"✓":evidence.readiness.tone==="medium"?"~":"!"}</div><small>AUTOMATED LANDSCAPE ASSESSMENT</small><h3>{evidence.readiness.level}</h3><p>{evidence.readiness.rationale}</p>
           <div className="signal-list"><div><span>Evidence volume</span><b>{evidence.counts.totalTrials>=5?"Established":"Limited"}</b></div><div><span>Late-stage coverage</span><b>{evidence.counts.lateStage?"Present":"Not found"}</b></div><div><span>Result availability</span><b>{evidence.counts.withResults?"Present":"Limited"}</b></div><div><span>Human assessment</span><b>{review==="accepted"?"Reviewed":"Required"}</b></div></div>
           <div className="review-box"><strong>Scientist review</strong><p>Confirm that these records are relevant before interpreting outcomes or making a progression decision.</p>{review==="pending"?<button onClick={()=>setReview("accepted")}>Accept evidence set <Arrow/></button>:<div className="accepted">✓ Evidence set accepted <button onClick={()=>setReview("pending")}>Undo</button></div>}</div>
-          <div className="responsible-note" id="responsible"><b>Decision support, not a decision</b><span>TrialLens does not provide medical advice or autonomously make clinical-development decisions.</span></div>
+          <div className="responsible-note"><b>Decision support, not a decision</b><span>TrialLens does not provide medical advice or autonomously make clinical-development decisions.</span></div>
         </aside>
       </div>}
 
@@ -109,6 +118,10 @@ export default function Home() {
 
       {tab==="brief"&&<div className="brief-layout"><article className="panel brief-card"><span className="mini-label">EXPORTABLE REVIEW</span><h2>Evidence landscape brief</h2><div className="brief-meta"><div><span>Asset</span><b>{evidence.query.drug}</b></div><div><span>Indication</span><b>{evidence.query.condition}</b></div><div><span>Readiness</span><b>{evidence.readiness.level}</b></div><div><span>Review status</span><b>{review==="accepted"?"Accepted by reviewer":"Pending"}</b></div></div><h3>Automated rationale</h3><p>{evidence.readiness.rationale}</p><h3>Evidence snapshot</h3><p>{evidence.counts.totalTrials.toLocaleString()} registered trials and {evidence.counts.totalPublications.toLocaleString()} PubMed publications matched this asset–indication pair. The retrieved trial set contains {evidence.counts.lateStage} late-stage record(s) and {evidence.counts.withResults} record(s) with posted results.</p><div className="brief-warning"><b>Interpretation required</b>Review individual endpoints, outcome data, safety results, population relevance and study quality before reaching a progression conclusion.</div></article><aside><a className="download" href={`/api/brief?drug=${encodeURIComponent(evidence.query.drug)}&condition=${encodeURIComponent(evidence.query.condition)}&readiness=${encodeURIComponent(evidence.readiness.level)}&trials=${evidence.counts.totalTrials}&publications=${evidence.counts.totalPublications}&lateStage=${evidence.counts.lateStage}&results=${evidence.counts.withResults}&reviewed=${review==="accepted"}`} download>↓ Download brief <Arrow/></a><p>Exports the live source counts and review status as a text brief.</p></aside></div>}
     </section>}
-    <footer><a className="logo" href="#top"><Mark/><span>TrialLens</span><sup>AI</sup></a><p>Evidence → context → human decision</p><span>Official source data remains subject to its source record.</span></footer>
+    <section className="responsible-section" id="responsible">
+      <div><span className="mini-label">RESPONSIBLE AI</span><h2>Evidence support with clear boundaries</h2><p>TrialLens retrieves and structures source records so experts can review the evidence trail. It does not replace scientific, medical, regulatory or governance judgement.</p></div>
+      <div className="responsible-principles"><article><b>01</b><h3>Source-grounded</h3><p>Counts and records link back to ClinicalTrials.gov and PubMed.</p></article><article><b>02</b><h3>No invented outcomes</h3><p>The workspace does not infer efficacy or safety from registry metadata alone.</p></article><article><b>03</b><h3>Human accountable</h3><p>A qualified reviewer remains responsible for interpretation and decisions.</p></article></div>
+    </section>
+    <footer><button className="logo" type="button" onClick={startNewReview}><Mark/><span>TrialLens</span><sup>AI</sup></button><p>Evidence → context → human decision</p><span>Official source data remains subject to its source record.</span></footer>
   </main>;
 }
