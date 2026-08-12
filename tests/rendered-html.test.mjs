@@ -14,8 +14,9 @@ test("server-renders the TrialLens evidence workspace", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
   assert.match(html, /TrialLens AI/);
-  assert.match(html, /Evidence review/);
-  assert.match(html, /Conditional progress/);
+  assert.match(html, /Ask a hard development question/);
+  assert.match(html, /Analyse evidence/);
+  assert.match(html, /ClinicalTrials\.gov/);
   assert.match(html, /Human review required/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|react-loading-skeleton/i);
 });

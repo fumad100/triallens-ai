@@ -7,7 +7,19 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: "TrialLens AI — Evidence-grounded development decisions",
-  description: "A traceable clinical evidence workspace for drug-development teams.",
+  description: "Search live clinical trials and scientific literature in a traceable drug-development evidence workspace.",
+  metadataBase: new URL("https://triallens-ai-evidence.fmahamud16.chatgpt.site"),
+  openGraph: {
+    title: "TrialLens AI",
+    description: "Evidence first. Decisions with a source trail.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "TrialLens AI — Evidence first. Decisions with a source trail." }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TrialLens AI",
+    description: "Evidence first. Decisions with a source trail.",
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
